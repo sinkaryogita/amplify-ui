@@ -12,7 +12,7 @@ import '../style.css';
 import NavBar from './NavBar';
 
 export default function Layout({ children }) {
-  const [colorMode, setColorMode] = React.useState<ColorMode>('system');
+  const [colorMode, setColorMode] = React.useState<ColorMode>('light');
   const [navOpen, toggleNavOpen] = React.useState(false);
 
   const theme: Theme = {

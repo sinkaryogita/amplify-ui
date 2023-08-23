@@ -11,41 +11,42 @@ export default function LivenessInlineResults({
   getLivenessResponse,
   onUserCancel,
 }) {
-  const { isLive, confidenceScore, auditImageBytes } = getLivenessResponse;
+  // const { isLive, confidenceScore, auditImageBytes } = getLivenessResponse;
+  console.log({ getLivenessResponse });
 
-  // Previously the rekognition backend passed the base64 string but from the api direclty you receive a byte array
-  var base64string = Buffer.from(
-    new Uint8Array(Object.values(auditImageBytes))
-  ).toString('base64');
-  const displayScore = truncateNumber(confidenceScore, 4);
+  // // Previously the rekognition backend passed the base64 string but from the api direclty you receive a byte array
+  // var base64string = Buffer.from(
+  //   new Uint8Array(Object.values(auditImageBytes))
+  // ).toString('base64');
+  // const displayScore = truncateNumber(confidenceScore, 4);
   return (
     <>
-      <Flex as="span" style={{ whiteSpace: 'nowrap' }}>
+      <Flex as="div" direction="column">
         <Text>Liveness result:</Text>
-        <Text fontWeight="bold" margin="0 0.5rem">
-          {isLive ? 'Check successful' : 'Check unsuccessful'}
+        <Text margin="0 0.5rem">
+          {JSON.stringify(getLivenessResponse, null, 4)}
         </Text>
       </Flex>
-
+      {/* 
       <Text as="span" style={{ whiteSpace: 'nowrap' }}>
         Confidence score:
         <Badge variation={isLive ? 'success' : 'error'} margin="0 0.5rem">
           {displayScore}
         </Badge>
-      </Text>
+      </Text> */}
 
-      <Flex justifyContent="start">
+      {/* <Flex justifyContent="start">
         <Button variation="primary" type="button" onClick={onUserCancel}>
           Try again
         </Button>
-      </Flex>
+      </Flex> */}
 
-      <Image
+      {/* <Image
         width="100%"
         height="100%"
         src={`data:image/jpeg;base64,${base64string}`}
         alt="Audit image"
-      />
+      /> */}
     </>
   );
 }

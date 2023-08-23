@@ -73,7 +73,7 @@ export default function LivenessDefault({
               ) : (
                 <FaceLivenessDetector
                   sessionId={createLivenessSessionApiData.sessionId}
-                  region={'us-east-1'}
+                  region={'ap-south-1'}
                   onUserCancel={onUserCancel}
                   onAnalysisComplete={async () => {
                     await handleGetLivenessDetection(
