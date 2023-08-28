@@ -52,6 +52,7 @@ export const LivenessCheck: React.FC<LivenessCheckProps> = ({
   const isPermissionDenied = state.matches('permissionDenied');
   const isMobile = isMobileScreen();
 
+  // console.log({errorState});
   const recheckCameraPermissions = () => {
     send({ type: 'RETRY_CAMERA_CHECK' });
   };

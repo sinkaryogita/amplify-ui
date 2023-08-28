@@ -869,6 +869,46 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
     services: {
       async checkVirtualCameraAndGetStream(context) {
         const { videoConstraints } = context.videoAssociatedParams!;
+        // const {deviceId} = context;
+        const deviceId = window?.deviceId;
+        console.log({ deviceId });
+        if (deviceId) {
+          const devices = await navigator.mediaDevices.enumerateDevices();
+          const device = devices
+            .filter((device) => device.kind === 'videoinput')
+            .filter((mDevices) => mDevices.deviceId === deviceId)[0];
+
+          const isRealCameraDevice = !isCameraDeviceVirtual(device);
+
+          if (!isRealCameraDevice) {
+            throw new Error('Please select a real camera');
+          }
+
+          const vConstraints = {
+            ...videoConstraints,
+            deviceId: { exact: deviceId },
+          };
+          console.log({ vConstraints });
+          const deviceStream = await navigator.mediaDevices.getUserMedia({
+            video: vConstraints,
+            audio: false,
+          });
+
+          console.log({ deviceStream });
+
+          const tracksWithMoreThan15Fps = deviceStream
+            .getTracks()
+            .filter((track) => {
+              const settings = track.getSettings();
+              return settings.frameRate! >= 15;
+            });
+
+          if (tracksWithMoreThan15Fps.length < 1) {
+            throw new Error('Please select a camera with more than 15 fps.');
+          }
+
+          return { stream: deviceStream };
+        }
 
         // Get initial stream to enumerate devices with non-empty labels
         const initialStream = await navigator.mediaDevices.getUserMedia({

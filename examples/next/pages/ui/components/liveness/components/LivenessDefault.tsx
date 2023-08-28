@@ -1,4 +1,4 @@
-import { View, Flex, Loader, Text } from '@aws-amplify/ui-react';
+import { View, Flex, Loader, Text, SelectField } from '@aws-amplify/ui-react';
 import {
   FaceLivenessDetector,
   FaceLivenessDetectorCore,
@@ -6,6 +6,7 @@ import {
 import { useLiveness } from './useLiveness';
 import { SessionIdAlert } from './SessionIdAlert';
 import LivenessInlineResults from './LivenessInlineResults';
+import { useEffect, useState } from 'react';
 
 export default function LivenessDefault({
   disableInstructionScreen = false,
@@ -21,6 +22,9 @@ export default function LivenessDefault({
     stopLiveness,
   } = useLiveness();
 
+  const [cameraDevices, setCameraDevices] = useState([]);
+  const [deviceId, setDeviceId] = useState();
+
   if (createLivenessSessionApiError) {
     return <div>Some error occured...</div>;
   }
@@ -28,6 +32,36 @@ export default function LivenessDefault({
   function onUserCancel() {
     stopLiveness();
   }
+
+  useEffect(() => {
+    const getCameraDevices = async () => {
+      const devices = await navigator.mediaDevices.enumerateDevices();
+      let count = 0;
+      const videoDevices = [];
+      devices.forEach((mediaDevice) => {
+        if (mediaDevice.kind === 'videoinput') {
+          count += 1;
+          const option = {
+            deviceId: mediaDevice.deviceId,
+            label: mediaDevice.label || `Camera ${count}`,
+          };
+          videoDevices.push(option);
+        }
+      });
+
+      setDeviceId(videoDevices[0].deviceId);
+      console.log({ videoDevices });
+      setCameraDevices(videoDevices);
+    };
+
+    getCameraDevices();
+  }, []);
+
+  const handleChangeDeviceId = (id) => {
+    window.deviceId = id;
+    setDeviceId(id);
+    console.log(id);
+  };
 
   return (
     <View maxWidth="640px" margin="0 auto">
@@ -71,21 +105,33 @@ export default function LivenessDefault({
                   config={{ credentialProvider }}
                 />
               ) : (
-                <FaceLivenessDetector
-                  sessionId={createLivenessSessionApiData.sessionId}
-                  region={'ap-south-1'}
-                  onUserCancel={onUserCancel}
-                  onAnalysisComplete={async () => {
-                    await handleGetLivenessDetection(
-                      createLivenessSessionApiData.sessionId
-                    );
-                  }}
-                  onError={(error) => {
-                    console.error(error);
-                  }}
-                  disableInstructionScreen={disableInstructionScreen}
-                  components={components}
-                />
+                <>
+                  <SelectField
+                    label="Select Camera"
+                    onChange={(e) => handleChangeDeviceId(e.target.value)}
+                  >
+                    {cameraDevices.map((camera) => (
+                      <option value={camera.deviceId} key={camera.deviceId}>
+                        {camera.label}
+                      </option>
+                    ))}
+                  </SelectField>
+                  <FaceLivenessDetector
+                    sessionId={createLivenessSessionApiData.sessionId}
+                    region={'ap-south-1'}
+                    onUserCancel={onUserCancel}
+                    onAnalysisComplete={async () => {
+                      await handleGetLivenessDetection(
+                        createLivenessSessionApiData.sessionId
+                      );
+                    }}
+                    onError={(error) => {
+                      console.error(error);
+                    }}
+                    disableInstructionScreen={disableInstructionScreen}
+                    components={components}
+                  />
+                </>
               )
             ) : null}
           </Flex>
