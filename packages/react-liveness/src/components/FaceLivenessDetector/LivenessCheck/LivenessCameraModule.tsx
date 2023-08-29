@@ -44,6 +44,10 @@ export const selectFaceMatchState = createLivenessSelector(
   (state) => state.context.faceMatchAssociatedParams!.faceMatchState
 );
 
+export const selectFacingMode = createLivenessSelector(
+  (state) => state.context.facingMode
+);
+
 export interface LivenessCameraModuleProps {
   isMobileScreen: boolean;
   isRecordingStopped: boolean;
@@ -92,6 +96,7 @@ export const LivenessCameraModule = (
   const faceMatchPercentage = useLivenessSelector(selectFaceMatchPercentage);
   const faceMatchState = useLivenessSelector(selectFaceMatchState);
   const errorState = useLivenessSelector(selectErrorState);
+  const facingMode = useLivenessSelector(selectFacingMode);
   const showMatchIndicatorStates = [
     FaceMatchState.TOO_FAR,
     FaceMatchState.CANT_IDENTIFY,
@@ -186,7 +191,7 @@ export const LivenessCameraModule = (
           muted
           autoPlay
           playsInline
-          style={{ transform: 'scaleX(-1)' }}
+          style={facingMode === 'user' ? { transform: 'scaleX(-1)' } : {}}
           width={mediaWidth}
           height={mediaHeight}
           onCanPlay={handleMediaPlay}

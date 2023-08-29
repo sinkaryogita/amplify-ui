@@ -101,6 +101,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       isFaceFarEnoughBeforeRecording: undefined,
       isRecordingStopped: false,
       deviceId: undefined,
+      facingMode: 'user',
     },
     on: {
       CANCEL: 'userCancel',
@@ -439,6 +440,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
           ...context.videoAssociatedParams,
           videoMediaStream: event.data?.stream,
         }),
+        facingMode: (context, event) => event.data?.facingMode,
       }),
       initializeFaceDetector: assign({
         ovalAssociatedParams: (context) => {
@@ -894,11 +896,12 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
             audio: false,
           });
 
+          let facingMode;
           const tracksWithMoreThan15Fps = deviceStream
             .getTracks()
             .filter((track) => {
               const settings = track.getSettings();
-              console.log({ settings });
+              facingMode = settings?.facingMode || 'user';
               return settings.frameRate! >= 15;
             });
 
@@ -908,7 +911,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
             );
           }
 
-          return { stream: deviceStream };
+          return { stream: deviceStream, facingMode };
         }
 
         // Get initial stream to enumerate devices with non-empty labels
