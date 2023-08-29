@@ -58,9 +58,7 @@ export default function LivenessDefault({
   }, []);
 
   const handleChangeDeviceId = (id) => {
-    window.deviceId = id;
     setDeviceId(id);
-    console.log(id);
   };
 
   return (
@@ -130,6 +128,7 @@ export default function LivenessDefault({
                     }}
                     disableInstructionScreen={disableInstructionScreen}
                     components={components}
+                    deviceId={deviceId}
                   />
                 </>
               )

@@ -74,6 +74,7 @@ export interface HydratedLivenessContext {
   faceMatchStateBeforeStart: FaceMatchState;
   isFaceFarEnoughBeforeRecording: boolean;
   isRecordingStopped: boolean;
+  deviceId: string;
 }
 
 export type LivenessEventTypes =

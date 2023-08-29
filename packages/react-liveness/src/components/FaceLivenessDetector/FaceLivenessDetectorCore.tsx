@@ -23,6 +23,7 @@ export interface FaceLivenessDetectorCoreProps
   extends FaceLivenessDetectorPropsFromUi {
   components?: FaceLivenessDetectorComponents;
   displayText?: LivenessDisplayText;
+  deviceId?: string;
 }
 
 export default function FaceLivenessDetectorCore(
@@ -33,6 +34,7 @@ export default function FaceLivenessDetectorCore(
     components,
     config,
     displayText,
+    deviceId,
   } = props;
   const currElementRef = React.useRef<HTMLDivElement>(null);
   const {
@@ -59,8 +61,9 @@ export default function FaceLivenessDetectorCore(
   const beginLivenessCheck = React.useCallback(() => {
     send({
       type: 'BEGIN',
+      data: { deviceId },
     });
-  }, [send]);
+  }, [send, deviceId]);
 
   React.useLayoutEffect(() => {
     if (disableInstructionScreen && isStartView) {

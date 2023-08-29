@@ -13,6 +13,7 @@ export interface FaceLivenessDetectorProps
   extends FaceLivenessDetectorPropsFromUi {
   components?: FaceLivenessDetectorComponents;
   displayText?: LivenessDisplayText;
+  deviceId?: string;
 }
 
 const credentialProvider = async () => {

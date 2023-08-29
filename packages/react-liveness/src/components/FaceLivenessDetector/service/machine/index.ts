@@ -100,6 +100,7 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
       faceMatchStateBeforeStart: undefined,
       isFaceFarEnoughBeforeRecording: undefined,
       isRecordingStopped: false,
+      deviceId: undefined,
     },
     on: {
       CANCEL: 'userCancel',
@@ -133,7 +134,10 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
     states: {
       start: {
         on: {
-          BEGIN: 'cameraCheck',
+          BEGIN: {
+            target: 'cameraCheck',
+            actions: ['setDeviceId'],
+          },
         },
       },
       cameraCheck: {
@@ -419,6 +423,9 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
   },
   {
     actions: {
+      setDeviceId: assign({
+        deviceId: (context, event) => event.data?.deviceId,
+      }),
       spawnResponseStreamActor: assign({
         responseStreamActorRef: () => spawn(responseStreamActor),
       }),
@@ -869,42 +876,36 @@ export const livenessMachine = createMachine<LivenessContext, LivenessEvent>(
     services: {
       async checkVirtualCameraAndGetStream(context) {
         const { videoConstraints } = context.videoAssociatedParams!;
-        // const {deviceId} = context;
-        const deviceId = window?.deviceId;
-        console.log({ deviceId });
+
+        // Select stream from deviceId
+        const { deviceId } = context;
         if (deviceId) {
           const devices = await navigator.mediaDevices.enumerateDevices();
           const device = devices
             .filter((device) => device.kind === 'videoinput')
             .filter((mDevices) => mDevices.deviceId === deviceId)[0];
 
-          const isRealCameraDevice = !isCameraDeviceVirtual(device);
-
-          if (!isRealCameraDevice) {
+          if (isCameraDeviceVirtual(device)) {
             throw new Error('Please select a real camera');
           }
 
-          const vConstraints = {
-            ...videoConstraints,
-            deviceId: { exact: deviceId },
-          };
-          console.log({ vConstraints });
           const deviceStream = await navigator.mediaDevices.getUserMedia({
-            video: vConstraints,
+            video: { ...videoConstraints, deviceId: { exact: deviceId } },
             audio: false,
           });
-
-          console.log({ deviceStream });
 
           const tracksWithMoreThan15Fps = deviceStream
             .getTracks()
             .filter((track) => {
               const settings = track.getSettings();
+              console.log({ settings });
               return settings.frameRate! >= 15;
             });
 
           if (tracksWithMoreThan15Fps.length < 1) {
-            throw new Error('Please select a camera with more than 15 fps.');
+            throw new Error(
+              'Please select a camera that supports more than 15 fps.'
+            );
           }
 
           return { stream: deviceStream };
